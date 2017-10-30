@@ -29,6 +29,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -100,7 +101,12 @@ public class TextIndex extends InternalIndex<TextIndex.Definition, TextIndex.Fie
             @SerializedName("boolean")
             BOOLEAN,
             @SerializedName("number")
-            NUMBER
+            NUMBER;
+
+            @Override
+            public String toString() {
+                return super.toString().toLowerCase(Locale.ENGLISH);
+            }
         }
 
         /**
