@@ -61,6 +61,11 @@ public class IndexListTests extends MockedServerTest {
             "\"name\":\"textallfields\",\"type\":\"text\"," +
             "\"def\":{\"default_analyzer\":\"keyword\",\"default_field\":{\"enabled\": false}," +
             "\"partial_filter_selector\":{},\"fields\":[],\"index_array_lengths\":false}}";
+    private static String TEXT_SIMPLE_SELECTOR = "{\"ddoc\":\"_design/testindexddoc\"," +
+            "\"name\":\"simpleselector\",\"type\":\"text\",\"def\":{\"default_analyzer\":\"keyword\"," +
+            "\"default_field\":{},\"selector\":" + SELECTOR_STRING +"," +
+            "\"fields\":[{\"Movie_name\":\"string\"}]," +
+            "\"index_array_lengths\":true}}";
 
 
     private void enqueueList(String... indexes) {
@@ -175,6 +180,23 @@ public class IndexListTests extends MockedServerTest {
         assertEquals("There should be 1 text index", 1, indexes.size());
         TextIndex simple = indexes.get(0);
         assertSimpleText(simple);
+    }
+
+    /**
+     * Note this checks deserialization of the old "selector" field instead of
+     * partial_filter_selector
+     *
+     * @throws Exception
+     */
+    @Test
+    public void listSimpleTextIndexWithSelector() throws Exception {
+        enqueueList(TEXT_SIMPLE_SELECTOR);
+        List<TextIndex> indexes = db.listIndexes().textIndexes();
+        assertEquals("There should be 1 text index", 1, indexes.size());
+        TextIndex simple = indexes.get(0);
+        assertTextIndex(simple, "simpleselector", SELECTOR_STRING, "\"keyword\"", "{}",
+                Collections.singletonMap
+                ("Movie_name", TextIndex.Field.Type.STRING));
     }
 
     @Test
