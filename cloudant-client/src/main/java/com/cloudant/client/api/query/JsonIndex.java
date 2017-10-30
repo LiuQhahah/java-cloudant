@@ -28,6 +28,8 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,21 +70,12 @@ public class JsonIndex extends InternalIndex<JsonIndex.Definition, JsonIndex.Fie
     public static class Field extends Sort {
 
         /**
-         * Instantiate a field with the default ascending sort order.
-         *
-         * @param name the name of the field
-         */
-        public Field(String name) {
-            super(name);
-        }
-
-        /**
          * Instantiate a new Field
          *
          * @param name  the name of the field
          * @param order the sort order to apply
          */
-        public Field(String name, Sort.Order order) {
+        private Field(String name, Sort.Order order) {
             super(name, order);
         }
 
@@ -135,6 +128,34 @@ public class JsonIndex extends InternalIndex<JsonIndex.Definition, JsonIndex.Fie
         @Override
         protected Builder returnThis() {
             return this;
+        }
+
+        /**
+         * Add one or more fields to the JsonIndex configuration in ascending order.
+         *
+         * @param fieldNames names of the fields to index
+         * @return the builder for chaining
+         */
+        public Builder asc(String... fieldNames) {
+            return super.fields(fieldNamesToFieldList(Sort.Order.ASC, fieldNames));
+        }
+
+        /**
+         * Add one or more fields to the JsonIndex configuration in descending order.
+         *
+         * @param fieldNames names of the fields to index
+         * @return the builder for chaining
+         */
+        public Builder desc(String... fieldNames) {
+            return super.fields(fieldNamesToFieldList(Sort.Order.DESC, fieldNames));
+        }
+
+        private List<Field> fieldNamesToFieldList(Sort.Order order, String... fieldNames) {
+            List<Field> fields = new ArrayList<Field>(fieldNames.length);
+            for (String fieldName : fieldNames) {
+                fields.add(new Field(fieldName, order));
+            }
+            return fields;
         }
     }
 }

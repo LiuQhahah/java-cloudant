@@ -30,7 +30,6 @@ import com.cloudant.client.api.model.Permissions;
 import com.cloudant.client.api.model.Shard;
 import com.cloudant.client.api.query.Indexes;
 import com.cloudant.client.api.query.JsonIndex;
-import com.cloudant.client.api.query.Sort.Order;
 import com.cloudant.client.api.views.AllDocsRequestBuilder;
 import com.cloudant.client.api.views.ViewRequestBuilder;
 import com.cloudant.client.internal.DatabaseURIHelper;
@@ -289,23 +288,19 @@ public class Database {
     public void createIndex(String indexName, String designDocName, String indexType,
                             IndexField[] fields) {
         if (indexType == null || "json".equalsIgnoreCase(indexType)) {
-            JsonIndex.Field[] jFields = new JsonIndex.Field[fields.length];
-            int i = 0;
+            JsonIndex.Builder b = JsonIndex.builder().name(indexName).designDocument(designDocName);
             for (IndexField f : fields) {
-                Order order;
                 switch (f.getOrder()) {
                     case desc:
-                        order = Order.DESC;
+                        b.desc(f.getName());
                         break;
                     case asc:
                     default:
-                        order = Order.ASC;
+                        b.asc(f.getName());
                         break;
                 }
-                jFields[i] = new JsonIndex.Field(f.getName(), order);
-                i++;
             }
-            createIndex(new JsonIndex.Builder().fields(jFields).definition());
+            createIndex(b.definition());
         } else {
             throw new CouchDbException("Unsupported index type " + indexType);
         }

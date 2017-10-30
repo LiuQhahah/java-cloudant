@@ -17,7 +17,6 @@ package com.cloudant.api.query;
 import static org.junit.Assert.assertEquals;
 
 import com.cloudant.client.api.query.JsonIndex;
-import com.cloudant.client.api.query.Sort;
 import com.cloudant.client.api.query.TextIndex;
 import com.cloudant.tests.util.MockedServerTest;
 import com.google.gson.Gson;
@@ -42,17 +41,22 @@ public class IndexCreationTests extends MockedServerTest {
     @Test
     public void createJsonIndex() throws Exception {
         createIndexTest(JsonIndex.builder()
-                        .fields(new JsonIndex.Field("a"))
+                        .asc("a")
                         .definition(),
-                "{type: \"json\", index: {fields: [\"a\"]}}");
+                "{type: \"json\", index: {fields: [{\"a\":\"asc\"}]}}");
     }
 
+    /**
+     * Note mixed indexes are currently unsupported on the server, but we should still construct a
+     * valid object even if the server will reject it.
+     *
+     * @throws Exception
+     */
     @Test
     public void createJsonIndexSpecifyFieldOrder() throws Exception {
         createIndexTest(JsonIndex.builder()
-                        .fields(
-                                new JsonIndex.Field("a", Sort.Order.ASC),
-                                new JsonIndex.Field("d", Sort.Order.DESC))
+                        .asc("a")
+                        .desc("d")
                         .definition(),
                 "{type: \"json\", index: {fields: [{\"a\":\"asc\"},{\"d\":\"desc\"}]}}");
     }
@@ -61,18 +65,18 @@ public class IndexCreationTests extends MockedServerTest {
     public void createNamedJsonIndex() throws Exception {
         createIndexTest(JsonIndex.builder()
                         .name("testindex")
-                        .fields(new JsonIndex.Field("a"))
+                        .asc("a")
                         .definition(),
-                "{type: \"json\", name: \"testindex\", index: {fields: [\"a\"]}}");
+                "{type: \"json\", name: \"testindex\", index: {fields: [{\"a\":\"asc\"}]}}");
     }
 
     @Test
     public void createJsonIndexInDesignDoc() throws Exception {
         createIndexTest(JsonIndex.builder()
                         .designDocument("testddoc")
-                        .fields(new JsonIndex.Field("a"))
+                        .asc("a")
                         .definition(),
-                "{type: \"json\", ddoc: \"testddoc\", index: {fields: [\"a\"]}}");
+                "{type: \"json\", ddoc: \"testddoc\", index: {fields: [{\"a\":\"asc\"}]}}");
     }
 
     @Test
@@ -80,8 +84,8 @@ public class IndexCreationTests extends MockedServerTest {
         createIndexTest(JsonIndex.builder()
                         .designDocument("testddoc")
                         .name("testindex")
-                        .fields(new JsonIndex.Field("a", Sort.Order.ASC),
-                                new JsonIndex.Field("d", Sort.Order.DESC))
+                        .asc("a")
+                        .desc("d")
                         .definition(),
                 "{type: \"json\", ddoc: \"testddoc\", name: \"testindex\", " +
                         "index: {fields: [{\"a\":\"asc\"},{\"d\":\"desc\"}]}}");
@@ -90,28 +94,28 @@ public class IndexCreationTests extends MockedServerTest {
     @Test
     public void createJsonIndexPartialSelectorOnly() throws Exception {
         createIndexTest(JsonIndex.builder()
-                        .fields(new JsonIndex.Field("a"))
+                        .asc("a")
                         .partialFilterSelector(selectorContent)
                         .definition(),
-                "{type: \"json\", index: {" + selectorPair + ", fields: [\"a\"]}}");
+                "{type: \"json\", index: {" + selectorPair + ", fields: [{\"a\":\"asc\"}]}}");
     }
 
     @Test
     public void createJsonIndexPartialSelectorPair() throws Exception {
         createIndexTest(JsonIndex.builder()
-                        .fields(new JsonIndex.Field("a"))
+                        .asc("a")
                         .partialFilterSelector(selectorPair)
                         .definition(),
-                "{type: \"json\", index: {" + selectorPair + ", fields: [\"a\"]}}");
+                "{type: \"json\", index: {" + selectorPair + ", fields: [{\"a\":\"asc\"}]}}");
     }
 
     @Test
     public void createJsonIndexPartialSelectorObject() throws Exception {
         createIndexTest(JsonIndex.builder()
-                        .fields(new JsonIndex.Field("a"))
+                        .asc("a")
                         .partialFilterSelector(selector)
                         .definition(),
-                "{type: \"json\", index: {" + selectorPair + ", fields: [\"a\"]}}");
+                "{type: \"json\", index: {" + selectorPair + ", fields: [{\"a\":\"asc\"}]}}");
     }
 
     @Test
@@ -140,9 +144,9 @@ public class IndexCreationTests extends MockedServerTest {
     @Test
     public void createTextIndexWithFields() throws Exception {
         createIndexTest(TextIndex.builder()
-                        .fields(new TextIndex.Field("s", TextIndex.Field.Type.STRING),
-                                new TextIndex.Field("b", TextIndex.Field.Type.BOOLEAN),
-                                new TextIndex.Field("n", TextIndex.Field.Type.NUMBER))
+                        .string("s")
+                        .bool("b")
+                        .number("n")
                         .definition(),
                 "{type: \"text\", index: {fields: [{name: \"s\", type:\"string\"}," +
                         "{name: \"b\", type:\"boolean\"},{name: \"n\", type:\"number\"}]}}");
@@ -214,9 +218,9 @@ public class IndexCreationTests extends MockedServerTest {
         createIndexTest(TextIndex.builder()
                         .name("testindex")
                         .designDocument("testddoc")
-                        .fields(new TextIndex.Field("s", TextIndex.Field.Type.STRING),
-                                new TextIndex.Field("b", TextIndex.Field.Type.BOOLEAN),
-                                new TextIndex.Field("n", TextIndex.Field.Type.NUMBER))
+                        .string("s")
+                        .bool("b")
+                        .number("n")
                         .defaultField(true, "german")
                         .analyzer("keyword")
                         .partialFilterSelector(selector)

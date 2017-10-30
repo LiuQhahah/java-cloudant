@@ -24,7 +24,6 @@ import com.cloudant.client.api.Database;
 import com.cloudant.client.api.model.FindByIndexOptions;
 import com.cloudant.client.api.model.IndexField;
 import com.cloudant.client.api.query.JsonIndex;
-import com.cloudant.client.api.query.Sort;
 import com.cloudant.test.main.RequiresCloudant;
 import com.cloudant.tests.util.CloudantClientResource;
 import com.cloudant.tests.util.DatabaseResource;
@@ -76,14 +75,13 @@ public class IndexTests {
         r.trigger();
 
         //Create indexes
-        db.createIndex(new JsonIndex.Builder().name("Person_name")
+        db.createIndex(JsonIndex.builder().name("Person_name")
                 .designDocument("Person_name")
-                .fields(new JsonIndex.Field("Person_name", Sort.Order.ASC),
-                        new JsonIndex.Field("Movie_year", Sort.Order.ASC))
+                .asc("Person_name","Movie_year")
                 .definition());
-        db.createIndex(new JsonIndex.Builder().name("Movie_year")
+        db.createIndex(JsonIndex.builder().name("Movie_year")
                 .designDocument("Movie_year")
-                .fields(new JsonIndex.Field("Movie_year"))
+                .asc("Movie_year")
                 .definition());
 
         //Create selector object: {"Movie_year": { "$gt": 1960}, "Person_name": "Alec Guinness"}

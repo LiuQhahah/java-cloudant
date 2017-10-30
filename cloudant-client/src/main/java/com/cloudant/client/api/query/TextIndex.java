@@ -27,6 +27,8 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -107,12 +109,12 @@ public class TextIndex extends InternalIndex<TextIndex.Definition, TextIndex.Fie
          * @param name the name of the field
          * @param type the type of the field
          */
-        public Field(String name, Type type) {
+        private Field(String name, Type type) {
             super(name);
             this.type = type;
         }
 
-        Type getType() {
+        public Type getType() {
             return this.type;
         }
 
@@ -175,7 +177,8 @@ public class TextIndex extends InternalIndex<TextIndex.Definition, TextIndex.Fie
     /**
      * Class for building a definition for a text type index.
      */
-    public static class Builder extends com.cloudant.client.internal.query.Builder<TextIndex, Definition, Builder, Field> {
+    public static class Builder extends com.cloudant.client.internal.query.Builder<TextIndex,
+            Definition, Builder, Field> {
 
         private Builder() {
             // Prevent instantiation except by static TextIndex.builder()
@@ -229,6 +232,44 @@ public class TextIndex extends InternalIndex<TextIndex.Definition, TextIndex.Fie
         public TextIndex.Builder indexArrayLengths(boolean indexArrayLengths) {
             instance.def.index_array_lengths = indexArrayLengths;
             return this;
+        }
+
+        /**
+         * Add one or more fields containing string values to the text index configuration.
+         *
+         * @param fieldNames names of the fields to index
+         * @return the builder for chaining
+         */
+        public TextIndex.Builder string(String... fieldNames) {
+            return super.fields(fieldNamesToFieldList(Field.Type.STRING, fieldNames));
+        }
+
+        /**
+         * Add one or more fields containing numerical values to the text index configuration.
+         *
+         * @param fieldNames names of the fields to index
+         * @return the builder for chaining
+         */
+        public TextIndex.Builder number(String... fieldNames) {
+            return super.fields(fieldNamesToFieldList(Field.Type.NUMBER, fieldNames));
+        }
+
+        /**
+         * Add a field containing boolean values to the text index configuration.
+         *
+         * @param fieldNames name of the field to index
+         * @return the builder for chaining
+         */
+        public TextIndex.Builder bool(String... fieldNames) {
+            return super.fields(fieldNamesToFieldList(Field.Type.BOOLEAN, fieldNames));
+        }
+
+        private List<Field> fieldNamesToFieldList(Field.Type type, String... fieldNames) {
+            List<Field> fields = new ArrayList<Field>(fieldNames.length);
+            for (String fieldName : fieldNames) {
+                fields.add(new Field(fieldName, type));
+            }
+            return fields;
         }
     }
 }

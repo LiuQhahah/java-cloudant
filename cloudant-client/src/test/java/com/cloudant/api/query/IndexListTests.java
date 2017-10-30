@@ -28,8 +28,9 @@ import org.junit.Test;
 
 import okhttp3.mockwebserver.MockResponse;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class IndexListTests extends MockedServerTest {
 
@@ -95,44 +96,46 @@ public class IndexListTests extends MockedServerTest {
                 .getPartialFilterSelector());
     }
 
-    private void assertJsonIndex(JsonIndex index, String name, String selector, JsonIndex
-            .Field... fields) throws Exception {
+    private void assertJsonIndex(JsonIndex index, String name, String selector, Map<String, Sort
+            .Order>... expectedFields) throws Exception {
         assertIndex(index, name, "json", selector);
         // Assert the fields
-        assertEquals("The fields should be correct", Arrays.asList(fields), index.getFields());
+        new FieldAssertHelper.Json(expectedFields).assertFields(index.getFields());
     }
 
     private void assertTextIndex(TextIndex index, String name, String selector, String analyzer,
-                                 String defaultField, TextIndex.Field... fields) throws Exception {
+                                 String defaultField, Map<String, TextIndex.Field.Type>...
+                                         expectedFields) throws Exception {
         assertIndex(index, name, "text", selector);
         assertEquals("The analyzer should be correct", analyzer, index.getAnalyzer());
         assertEquals("The default field should be correct", defaultField, index.getDefaultField());
         // Assert the fields
-        assertEquals("The fields should be correct", Arrays.asList(fields), index.getFields());
+        new FieldAssertHelper.Text(expectedFields).assertFields(index.getFields());
     }
 
     private void assertSimpleJson(JsonIndex index) throws Exception {
-        assertJsonIndex(index, "simplejson", null, new JsonIndex.Field("Person_dob", Sort.Order
+        assertJsonIndex(index, "simplejson", null, Collections.singletonMap("Person_dob", Sort.Order
                 .ASC));
     }
 
     private void assertComplexJson(JsonIndex index) throws Exception {
-        assertJsonIndex(index, "complexjson", SELECTOR_STRING, new JsonIndex.Field("Person_name",
-                Sort.Order.ASC), new JsonIndex.Field("Movie_year", Sort.Order.DESC));
+        assertJsonIndex(index, "complexjson", SELECTOR_STRING, Collections.singletonMap
+                ("Person_name", Sort.Order
+                .ASC), Collections.singletonMap("Movie_year", Sort.Order.DESC));
     }
 
     private void assertSimpleText(TextIndex index) throws Exception {
-        assertTextIndex(index, "simpletext", null, "\"keyword\"", "{}", new TextIndex.Field
+        assertTextIndex(index, "simpletext", null, "\"keyword\"", "{}", Collections.singletonMap
                 ("Movie_name", TextIndex.Field.Type.STRING));
     }
 
     private void assertComplexText(TextIndex index) throws Exception {
         assertTextIndex(index, "complextext", SELECTOR_STRING, "{\"name\":\"perfield\"," +
                 "\"default\":\"english\",\"fields\":{\"spanish\":\"spanish\"," +
-                "\"german\":\"german\"}}", "{\"enabled\":true,\"analyzer\":\"spanish\"}", new
-                TextIndex.Field("Movie_name", TextIndex.Field.Type.STRING), new TextIndex.Field
-                ("Movie_runtime", TextIndex.Field.Type.NUMBER), new TextIndex.Field
-                ("Movie_wonaward", TextIndex.Field.Type.BOOLEAN));
+                "\"german\":\"german\"}}", "{\"enabled\":true,\"analyzer\":\"spanish\"}",
+                Collections.singletonMap("Movie_name", TextIndex.Field.Type.STRING), Collections
+                        .singletonMap("Movie_runtime", TextIndex.Field.Type.NUMBER), Collections
+                        .singletonMap("Movie_wonaward", TextIndex.Field.Type.BOOLEAN));
     }
 
     @Test
@@ -212,7 +215,8 @@ public class IndexListTests extends MockedServerTest {
                     Index<Field> a = indexes.get(i);
                     assertIndex(a, "_all_docs", null, "special", null);
                     assertEquals("There should be 1 field", 1, a.getFields().size());
-                    assertEquals("There field should be called _id", "_id", a.getFields().get(0).getName());
+                    assertEquals("There field should be called _id", "_id", a.getFields().get(0)
+                            .getName());
                     return;
                 case 1:
                     name = "simplejson";

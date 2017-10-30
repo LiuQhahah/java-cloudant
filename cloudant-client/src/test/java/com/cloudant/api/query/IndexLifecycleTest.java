@@ -16,7 +16,6 @@ package com.cloudant.api.query;
 
 import static org.junit.Assert.assertEquals;
 
-import com.cloudant.client.api.CloudantClient;
 import com.cloudant.client.api.Database;
 import com.cloudant.client.api.query.Field;
 import com.cloudant.client.api.query.Index;
@@ -34,7 +33,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.RuleChain;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -55,34 +54,26 @@ public class IndexLifecycleTest {
     public RuleChain chain = RuleChain.outerRule(clientResource).around(dbResource);
 
     private Database db;
-    private CloudantClient account;
-
-    private List<JsonIndex.Field> jFields = new ArrayList<JsonIndex.Field>(2);
-    private List<TextIndex.Field> tFields = new ArrayList<TextIndex.Field>(3);
 
     @Before
     public void createIndexes() throws Exception {
-        account = clientResource.get();
         db = dbResource.get();
 
         // Create a JSON index
-        jFields.add(new JsonIndex.Field("testDefaultAsc"));
-        jFields.add(new JsonIndex.Field("testAsc", Sort.Order.ASC));
         db.createIndex(JsonIndex.builder()
                 .designDocument("indexlifecycle")
                 .name("testjson")
-                .fields(jFields.toArray(new JsonIndex.Field[2]))
+                .asc("testDefaultAsc", "testAsc")
                 .definition()
         );
 
         // Create a text index
-        tFields.add(new TextIndex.Field("testString", TextIndex.Field.Type.STRING));
-        tFields.add(new TextIndex.Field("testNumber", TextIndex.Field.Type.NUMBER));
-        tFields.add(new TextIndex.Field("testBoolean", TextIndex.Field.Type.BOOLEAN));
         db.createIndex(TextIndex.builder()
                 .designDocument("indexlifecycle")
                 .name("testtext")
-                .fields(tFields.toArray(new TextIndex.Field[3]))
+                .string("testString")
+                .number("testNumber")
+                .bool("testBoolean")
                 .definition()
         );
     }
@@ -100,10 +91,9 @@ public class IndexLifecycleTest {
             assertEquals("The type should be correct", "json", jIndex.getType());
             List<JsonIndex.Field> fields = jIndex.getFields();
             assertEquals("There should be two fields", 2, fields.size());
-            // For assertion replace the "null" ascending with a real order
-            jFields.remove(0);
-            jFields.add(0, new JsonIndex.Field("testDefaultAsc", Sort.Order.ASC));
-            assertEquals("The fields should be correct", jFields, fields);
+            // Field assertions
+            new FieldAssertHelper.Json(Collections.singletonMap("testDefaultAsc", Sort.Order.ASC)
+                    , Collections.singletonMap("testAsc", Sort.Order.ASC)).assertFields(fields);
         }
 
         {
@@ -117,8 +107,12 @@ public class IndexLifecycleTest {
             assertEquals("The type should be correct", "text", tIndex.getType());
             List<TextIndex.Field> fields = tIndex.getFields();
             assertEquals("There should be three fields", 3, fields.size());
-            assertEquals("The fields should be correct", tFields, fields);
+            // Field assertions
+            new FieldAssertHelper.Text(Collections.singletonMap("testString", TextIndex.Field.Type.STRING),
+                    Collections.singletonMap("testNumber", TextIndex.Field.Type.NUMBER),
+                    Collections.singletonMap("testBoolean", TextIndex.Field.Type.BOOLEAN)).assertFields(fields);
         }
+
         {
             // All indexes
             List<Index<Field>> allIndexes = db.listIndexes().allIndexes();

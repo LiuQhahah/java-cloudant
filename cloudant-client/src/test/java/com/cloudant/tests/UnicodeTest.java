@@ -20,7 +20,6 @@ import com.cloudant.client.api.Database;
 import com.cloudant.client.api.query.Field;
 import com.cloudant.client.api.query.Index;
 import com.cloudant.client.api.query.JsonIndex;
-import com.cloudant.client.api.query.Sort;
 import com.cloudant.client.api.views.Key;
 import com.cloudant.client.internal.DatabaseURIHelper;
 import com.cloudant.http.Http;
@@ -341,10 +340,11 @@ public class UnicodeTest {
     @Test
     @Category(RequiresCloudant.class)
     public void testUnicodeInObject() throws Exception {
-        db.createIndex(new JsonIndex.Builder()
+        db.createIndex(JsonIndex.builder()
                 .name("myview")
                 .designDocument("mydesigndoc")
-                .fields(new JsonIndex.Field("foo", Sort.Order.ASC)).definition());
+                .asc("foo")
+                .definition());
 
         // Show the indices.
         for (Index<Field> index : db.listIndexes().allIndexes()) {

@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * Abstract index definition builder to be extended by specific index type builders.
@@ -80,11 +80,11 @@ public abstract class Builder<I extends InternalIndex<D, F>, D extends Definitio
      * @param fields the {@link TextIndex.Field} configurations to add
      * @return the builder for chaining
      */
-    public B fields(F... fields) {
+    protected B fields(List<F> fields) {
         if (instance.def.fields == null) {
-            instance.def.fields = new ArrayList<F>(fields.length);
+            instance.def.fields = new ArrayList<F>(fields.size());
         }
-        instance.def.fields.addAll(Arrays.asList(fields));
+        instance.def.fields.addAll(fields);
         return returnThis();
     }
 
