@@ -17,6 +17,8 @@ package com.cloudant.client.api.query;
 import com.cloudant.client.internal.query.NamedField;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Locale;
+
 public class Sort extends NamedField {
 
     public enum Order {
@@ -29,7 +31,12 @@ public class Sort extends NamedField {
          * descending
          */
         @SerializedName("desc")
-        DESC
+        DESC;
+
+        @Override
+        public String toString() {
+            return super.toString().toLowerCase(Locale.ENGLISH);
+        }
     }
 
     private Order order = null;
