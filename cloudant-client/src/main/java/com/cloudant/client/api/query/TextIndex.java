@@ -48,6 +48,15 @@ public class TextIndex extends InternalIndex<TextIndex.Definition, TextIndex.Fie
     }
 
     /**
+     * Get a new instance of a builder to configure a TextIndex.
+     *
+     * @return a builder for configuring a TextIndex
+     */
+    public static TextIndex.Builder builder() {
+        return new TextIndex.Builder();
+    }
+
+    /**
      * Get the JSON string representation of the default field configuration.
      *
      * @return default field JSON as string
@@ -167,6 +176,10 @@ public class TextIndex extends InternalIndex<TextIndex.Definition, TextIndex.Fie
      * Class for building a definition for a text type index.
      */
     public static class Builder extends com.cloudant.client.internal.query.Builder<TextIndex, Definition, Builder, Field> {
+
+        private Builder() {
+            // Prevent instantiation except by static TextIndex.builder()
+        }
 
         @Override
         protected TextIndex.Builder returnThis() {

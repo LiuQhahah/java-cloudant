@@ -48,6 +48,15 @@ public class JsonIndex extends InternalIndex<JsonIndex.Definition, JsonIndex.Fie
         this.def = new Definition();
     }
 
+    /**
+     * Get a new instance of a builder to configure a JsonIndex.
+     *
+     * @return a builder for configuring a JsonIndex
+     */
+    public static JsonIndex.Builder builder() {
+        return new JsonIndex.Builder();
+    }
+
     static class Definition extends com.cloudant.client.internal.query.Definition<Field> {
 
     }
@@ -114,6 +123,10 @@ public class JsonIndex extends InternalIndex<JsonIndex.Definition, JsonIndex.Fie
      */
     public static class Builder extends com.cloudant.client.internal.query.Builder<JsonIndex,
             Definition, Builder, Field> {
+
+        private Builder() {
+            // Prevent instantiation except by static JsonIndex.builder()
+        }
 
         protected JsonIndex newInstance() {
             return new JsonIndex();
