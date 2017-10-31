@@ -24,10 +24,14 @@ import com.cloudant.client.api.query.Sort;
 import com.cloudant.client.api.query.TextIndex;
 import com.cloudant.tests.util.MockedServerTest;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
 import okhttp3.mockwebserver.MockResponse;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,36 +41,30 @@ public class IndexListTests extends MockedServerTest {
     private static String SELECTOR_STRING = "{\"year\":{\"$gt\":2010}}";
 
     // _all_docs
-    private static String ALL_DOCS = "{\"ddoc\":null,\"name\":\"_all_docs\",\"type\":\"special\"," +
-            "\"def\":{\"fields\":[{\"_id\":\"asc\"}]}}";
-    private static String JSON_SIMPLE = "{\"ddoc\":\"_design/testindexddoc\"," +
-            "\"name\":\"simplejson\",\"type\":\"json\"," +
-            "\"def\":{\"fields\":[{\"Person_dob\":\"asc\"}],\"partial_filter_selector\":{}}}";
-    private static String JSON_COMPLEX = "{\"ddoc\":\"_design/testindexddoc\"," +
-            "\"name\":\"complexjson\",\"type\":\"json\",\"def\":{\"partial_filter_selector\":" +
-            SELECTOR_STRING + ",\"fields\":[{\"Person_name\":\"asc\"},{\"Movie_year\":\"desc\"}]}}";
-    private static String TEXT_SIMPLE = "{\"ddoc\":\"_design/testindexddoc\"," +
-            "\"name\":\"simpletext\",\"type\":\"text\",\"def\":{\"default_analyzer\":\"keyword\"," +
-            "\"default_field\":{},\"partial_filter_selector\":{}," +
-            "\"fields\":[{\"Movie_name\":\"string\"}]," +
-            "\"index_array_lengths\":true}}";
-    private static String TEXT_COMPLEX = "{\"ddoc\":\"_design/testindexddoc\"," +
-            "\"name\":\"complextext\",\"type\":\"text\",\"def\":{\"default_analyzer\": " +
-            "{\"name\":\"perfield\",\"default\":\"english\",\"fields\":{\"spanish\":\"spanish\"," +
-            "\"german\":\"german\"}},\"default_field\":{\"enabled\": true, \"analyzer\": " +
-            "\"spanish\"},\"partial_filter_selector\":" + SELECTOR_STRING + "," +
-            "\"fields\":[{\"Movie_name\":\"string\"}, {\"Movie_runtime\": \"number\"}, " +
-            "{\"Movie_wonaward\": \"boolean\"}],\"index_array_lengths\":true}}";
-    private static String TEXT_ALL_FIELDS = "{\"ddoc\":\"_design/testindexddoc\"," +
-            "\"name\":\"textallfields\",\"type\":\"text\"," +
-            "\"def\":{\"default_analyzer\":\"keyword\",\"default_field\":{\"enabled\": false}," +
-            "\"partial_filter_selector\":{},\"fields\":[],\"index_array_lengths\":false}}";
-    private static String TEXT_SIMPLE_SELECTOR = "{\"ddoc\":\"_design/testindexddoc\"," +
-            "\"name\":\"simpleselector\",\"type\":\"text\",\"def\":{\"default_analyzer\":\"keyword\"," +
-            "\"default_field\":{},\"selector\":" + SELECTOR_STRING +"," +
-            "\"fields\":[{\"Movie_name\":\"string\"}]," +
-            "\"index_array_lengths\":true}}";
+    private static String ALL_DOCS = fromFile("index_all_docs");
+    private static String JSON_SIMPLE = fromFile("index_json_simple");
+    private static String JSON_COMPLEX = fromFile("index_json_complex");
+    private static String TEXT_SIMPLE = fromFile("index_text_simple");
+    private static String TEXT_COMPLEX = fromFile("index_text_complex");
+    private static String TEXT_ALL_FIELDS = fromFile("index_text_all");
+    private static String TEXT_SIMPLE_SELECTOR = fromFile("index_text_simple_selector");
 
+    /**
+     * Utility to convert a test resource file into a string.
+     *
+     * @param resourceFileName name of the file excluding path and extension
+     * @return
+     */
+    private static String fromFile(String resourceFileName) {
+        System.out.println(new File(".").getAbsolutePath());
+        try {
+            return IOUtils.toString(new BufferedInputStream(new FileInputStream("" +
+                    "./src/test/resources/query-tests/" + resourceFileName + ".js")), "UTF-8");
+        } catch (Exception e) {
+            fail("Error reading test resource: " +  e.getMessage());
+        }
+        return null;
+    }
 
     private void enqueueList(String... indexes) {
         MockResponse response = new MockResponse();
@@ -126,7 +124,7 @@ public class IndexListTests extends MockedServerTest {
     private void assertComplexJson(JsonIndex index) throws Exception {
         assertJsonIndex(index, "complexjson", SELECTOR_STRING, Collections.singletonMap
                 ("Person_name", Sort.Order
-                .ASC), Collections.singletonMap("Movie_year", Sort.Order.DESC));
+                        .ASC), Collections.singletonMap("Movie_year", Sort.Order.DESC));
     }
 
     private void assertSimpleText(TextIndex index) throws Exception {
@@ -136,8 +134,8 @@ public class IndexListTests extends MockedServerTest {
 
     private void assertComplexText(TextIndex index) throws Exception {
         assertTextIndex(index, "complextext", SELECTOR_STRING, "{\"name\":\"perfield\"," +
-                "\"default\":\"english\",\"fields\":{\"spanish\":\"spanish\"," +
-                "\"german\":\"german\"}}", "{\"enabled\":true,\"analyzer\":\"spanish\"}",
+                        "\"default\":\"english\",\"fields\":{\"spanish\":\"spanish\"," +
+                        "\"german\":\"german\"}}", "{\"enabled\":true,\"analyzer\":\"spanish\"}",
                 Collections.singletonMap("Movie_name", TextIndex.Field.Type.STRING), Collections
                         .singletonMap("Movie_runtime", TextIndex.Field.Type.NUMBER), Collections
                         .singletonMap("Movie_wonaward", TextIndex.Field.Type.BOOLEAN));
@@ -196,7 +194,7 @@ public class IndexListTests extends MockedServerTest {
         TextIndex simple = indexes.get(0);
         assertTextIndex(simple, "simpleselector", SELECTOR_STRING, "\"keyword\"", "{}",
                 Collections.singletonMap
-                ("Movie_name", TextIndex.Field.Type.STRING));
+                        ("Movie_name", TextIndex.Field.Type.STRING));
     }
 
     @Test
