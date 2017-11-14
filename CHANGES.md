@@ -1,3 +1,6 @@
+# UNRELEASED
+- [NEW] Allow custom service name in CloudFoundry VCAP_SERVICES environment variable.
+
 # 2.10.0 (2017-11-07)
 - [NEW] Added API for upcoming IBM Cloud Identity and Access Management support for Cloudant on IBM
   Cloud. Note: IAM API key support is not yet enabled in the service.
