@@ -99,6 +99,15 @@ public class CloudFoundryServiceTest {
         ClientBuilder.bluemix(vcap.toJson(), "missingService", "test_bluemix_service_1").build();
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void vcapNullServiceNameSpecified() {
+        VCAPGenerator vcap = new CloudFoundryServiceTest.VCAPGenerator();
+        vcap.createNewService("test_bluemix_service_1",
+                CloudantClientHelper.SERVER_URI_WITH_USER_INFO,
+                CloudantClientHelper.COUCH_USERNAME, CloudantClientHelper.COUCH_PASSWORD);
+        ClientBuilder.bluemix(vcap.toJson(), null, "test_bluemix_service_1").build();
+    }
+
     @Test
     public void vcapSingleServiceWithName() {
         VCAPGenerator vcap = new CloudFoundryServiceTest.VCAPGenerator();

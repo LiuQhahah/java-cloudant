@@ -693,11 +693,6 @@ public class ClientBuilder {
      * Sets Cloudant client credentials by inspecting a service information JSON string. This object
      * takes the form of a {@code VCAP_SERVICES} environment variable which is a JSON object that
      * contains information that you can use to interact with a service instance in Bluemix.
-     * <P>
-     * Note: Specifying an instance name is only required when multiple Cloudant service instances
-     * are present. If there is only a single Cloudant service instance then
-     * {@link #bluemix(String)} can also be used.
-     * </P>
      *
      * @param vcapServices service information JSON string, for example the contents of
      *                     {@code VCAP_SERVICES} environment variable
@@ -709,6 +704,7 @@ public class ClientBuilder {
      * @throws IllegalArgumentException if any of the following conditions are true:
      * <ul>
      *     <li>The {@code vcapServices} is {@code null}.</li>
+     *     <li>The {@code serviceName} is {@code null}.</li>
      *     <li>The {@code vcapServices} is not valid.</li>
      *     <li>A service with the name matching {@code serviceName} could not be found in
      *     {@code vcapServices}.</li>
@@ -721,6 +717,10 @@ public class ClientBuilder {
     public static ClientBuilder bluemix(String vcapServices, String serviceName, String instanceName) {
         if (vcapServices == null) {
             throw new IllegalArgumentException("The vcapServices JSON information was null.");
+        }
+
+        if (serviceName == null) {
+            throw new IllegalArgumentException("No Cloudant services information present.");
         }
 
         JsonObject obj;
